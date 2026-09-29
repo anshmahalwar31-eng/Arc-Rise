@@ -1,0 +1,1771 @@
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import {
+  Flame,
+  CheckCircle2,
+  Circle,
+  Plus,
+  Lock,
+  Unlock,
+  Shield,
+  Zap,
+  Sparkles,
+  Trophy,
+  Calendar,
+  Clock,
+  Activity,
+  Layers,
+  Settings,
+  Bell,
+  Download,
+  RotateCcw,
+  ChevronRight,
+  TrendingUp,
+  Brain,
+  Dumbbell,
+  Code,
+  Compass,
+  Coffee,
+  X,
+  AlertTriangle,
+  Volume2,
+  VolumeX,
+  Play
+} from 'lucide-react';
+
+class SciFiAudio {
+  constructor() {
+    this.ctx = null;
+    this.muted = false;
+  }
+
+  init() {
+    if (!this.ctx && typeof window !== 'undefined') {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (AudioCtx) {
+        this.ctx = new AudioCtx();
+      }
+    }
+  }
+
+  playCompletion() {
+    if (this.muted) return;
+    this.init();
+    if (!this.ctx) return;
+    try {
+      const t = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(587.33, t); // D5
+      osc.frequency.exponentialRampToValueAtTime(880, t + 0.15); // A5
+      osc.frequency.exponentialRampToValueAtTime(1174.66, t + 0.35); // D6
+
+      gain.gain.setValueAtTime(0.001, t);
+      gain.gain.linearRampToValueAtTime(0.2, t + 0.05);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(t);
+      osc.stop(t + 0.45);
+    } catch (e) {
+      console.warn('Audio play error', e);
+    }
+  }
+
+  playLock() {
+    if (this.muted) return;
+    this.init();
+    if (!this.ctx) return;
+    try {
+      const t = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(220, t);
+      osc.frequency.exponentialRampToValueAtTime(440, t + 0.08);
+
+      gain.gain.setValueAtTime(0.15, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(t);
+      osc.stop(t + 0.25);
+    } catch (e) {}
+  }
+
+  playLevelUp() {
+    if (this.muted) return;
+    this.init();
+    if (!this.ctx) return;
+    try {
+      const t = this.ctx.currentTime;
+      const chords = [440, 554.37, 659.25, 880]; // A Major Cosmic Chord
+      chords.forEach((freq, idx) => {
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, t + idx * 0.08);
+        gain.gain.setValueAtTime(0.001, t + idx * 0.08);
+        gain.gain.linearRampToValueAtTime(0.12, t + idx * 0.08 + 0.05);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.8 + idx * 0.1);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(t + idx * 0.08);
+        osc.stop(t + 0.9 + idx * 0.1);
+      });
+    } catch (e) {}
+  }
+}
+
+const sfx = new SciFiAudio();
+
+const MOTIVATIONAL_QUOTES = [
+  "Your future is built by what you do today, not tomorrow.",
+  "Quiet discipline in the cold produces unstoppable light in the spring.",
+  "No distractions. No excuses. Execute the standard.",
+  "Small wins stacked consistently compound into absolute mastery.",
+  "Suffer the pain of discipline or suffer the agony of regret.",
+  "The arc bends towards the relentlessly prepared.",
+  "Prove to yourself that your word is unbreakable."
+];
+
+const COMPLETION_WHISPERS = [
+  "One more promise kept.",
+  "Standard held. Next.",
+  "Discipline solidified.",
+  "Energy matrix reinforced.",
+  "Momentum surging forward.",
+  "Another brick in your foundation."
+];
+
+const AI_CHALLENGES = [
+  {
+    id: "ch-1",
+    title: "Deep Work Sprint",
+    category: "Study",
+    duration: 30,
+    xp: 25,
+    description: "Study or read with zero tab switches and phone in another room.",
+    why: "Eliminating micro-distractions drastically re-trains executive attention span."
+  },
+  {
+    id: "ch-2",
+    title: "100 Push-ups / Core Blitz",
+    category: "Fitness",
+    duration: 20,
+    xp: 20,
+    description: "Break into 4 sets of 25 pushups or plank holds throughout the afternoon.",
+    why: "Physical intensity triggers acute neural clarity and testosterone spikes."
+  },
+  {
+    id: "ch-3",
+    title: "Algorithmic Problem or Architecture Doc",
+    category: "Coding",
+    duration: 45,
+    xp: 30,
+    description: "Solve 1 Medium LeetCode problem or trace a core system design diagram.",
+    why: "Sharpening technical problem solving creates immense leverage for high-tier roles."
+  },
+  {
+    id: "ch-4",
+    title: "Tactical Cold Exposure / Mobility Flow",
+    category: "Lifestyle",
+    duration: 15,
+    xp: 15,
+    description: "End your morning shower with 2 minutes of cold water and stretch hips.",
+    why: "Spikes norepinephrine naturally and bulletproofs posture from desk work."
+  },
+  {
+    id: "ch-5",
+    title: "Unfiltered Vocal Articulation",
+    category: "Personal Development",
+    duration: 10,
+    xp: 20,
+    description: "Record a 3-minute explanation of an academic or tech concept to yourself.",
+    why: "Translating internal knowledge into clear speech develops dominant presence."
+  }
+];
+
+const STARTER_HABITS = [
+  {
+    id: "h-1",
+    name: "College Lecture Deep Review & Notes",
+    category: "Study",
+    duration: 50,
+    reminder: "16:30",
+    xp: 25,
+    completed: true,
+    description: "Synthesize today's computer science notes into core mental models."
+  },
+  {
+    id: "h-2",
+    name: "Python / AI Engineering Project Sprint",
+    category: "Coding",
+    duration: 60,
+    reminder: "19:00",
+    xp: 30,
+    completed: true,
+    description: "Implement core backend API services and token auth logic."
+  },
+  {
+    id: "h-3",
+    name: "Winter Arc Strength & Hypertrophy Session",
+    category: "Fitness",
+    duration: 45,
+    reminder: "18:00",
+    xp: 30,
+    completed: false,
+    description: "Upper body push volume & heavy core stabilizer carries."
+  },
+  {
+    id: "h-4",
+    name: "3.5km Aerobic Pace Run",
+    category: "Running",
+    duration: 25,
+    reminder: "07:30",
+    xp: 25,
+    completed: true,
+    description: "Zone 2 steady cardiovascular base building."
+  },
+  {
+    id: "h-5",
+    name: "Posture & Spine Decompression Drill",
+    category: "Lifestyle",
+    duration: 15,
+    reminder: "21:30",
+    xp: 15,
+    completed: false,
+    description: "Thoracic extensions, dead hangs, and hip flexor stretches."
+  },
+  {
+    id: "h-6",
+    name: "Zero Phone in Bed + Mindset Review",
+    category: "Personal Development",
+    duration: 20,
+    reminder: "22:45",
+    xp: 20,
+    completed: false,
+    description: "Plan tomorrow's tactical objectives and sleep in pitch black."
+  }
+];
+
+const CATEGORY_META = {
+  Fitness: { icon: Dumbbell, color: "text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/30" },
+  Running: { icon: Activity, color: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/30" },
+  Study: { icon: Brain, color: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/30" },
+  Coding: { icon: Code, color: "text-cyan-400", bg: "bg-cyan-500/10", border: "border-cyan-500/30" },
+  "Personal Development": { icon: Compass, color: "text-purple-400", bg: "bg-purple-500/10", border: "border-purple-500/30" },
+  Lifestyle: { icon: Coffee, color: "text-rose-400", bg: "bg-rose-500/10", border: "border-rose-500/30" },
+  Custom: { icon: Zap, color: "text-indigo-400", bg: "bg-indigo-500/10", border: "border-indigo-500/30" }
+};
+
+const LEVEL_TIERS = [
+  { minXP: 0, title: "Initiate Arc", badge: "TIER 01" },
+  { minXP: 200, title: "Discipline Seeker", badge: "TIER 02" },
+  { minXP: 500, title: "Consistency Builder", badge: "TIER 03" },
+  { minXP: 900, title: "Focused Performer", badge: "TIER 04" },
+  { minXP: 1400, title: "Kinetic Operator", badge: "TIER 05" },
+  { minXP: 2000, title: "Unstoppable Momentum", badge: "TIER 06" },
+  { minXP: 3000, title: "Apex Transcendence", badge: "TIER 07" }
+];
+
+function getLevelInfo(xp) {
+  let level = 1;
+  let currentTier = LEVEL_TIERS[0];
+  let nextTier = LEVEL_TIERS[1];
+
+  for (let i = LEVEL_TIERS.length - 1; i >= 0; i--) {
+    if (xp >= LEVEL_TIERS[i].minXP) {
+      level = i + 1;
+      currentTier = LEVEL_TIERS[i];
+      nextTier = LEVEL_TIERS[i + 1] || { minXP: currentTier.minXP + 1000, title: "Mastery Horizon" };
+      break;
+    }
+  }
+
+  const baseXP = currentTier.minXP;
+  const targetXP = nextTier.minXP;
+  const progressInLevel = Math.max(0, xp - baseXP);
+  const totalNeededInLevel = Math.max(1, targetXP - baseXP);
+  const percentage = Math.min(100, Math.round((progressInLevel / totalNeededInLevel) * 100));
+
+  return {
+    level,
+    title: currentTier.title,
+    badge: currentTier.badge,
+    currentXP: xp,
+    baseXP,
+    targetXP,
+    percentage
+  };
+}
+
+const EnergyCore = ({ progress = 0 }) => {
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let animationId;
+    let time = 0;
+
+    // Set resolution for high DPI
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    ctx.scale(dpr, dpr);
+
+    // Dynamic particles
+    const particleCount = 28;
+    const particles = Array.from({ length: particleCount }, () => ({
+      angle: Math.random() * Math.PI * 2,
+      distance: 35 + Math.random() * 55,
+      speed: 0.008 + Math.random() * 0.015,
+      size: 1 + Math.random() * 2,
+      opacity: 0.2 + Math.random() * 0.7
+    }));
+
+    const render = () => {
+      time += 0.02;
+      const width = rect.width;
+      const height = rect.height;
+      const centerX = width / 2;
+      const centerY = height / 2;
+
+      ctx.clearRect(0, 0, width, height);
+
+      // Core glow radial gradient based on progress
+      const intensity = 0.3 + (progress / 100) * 0.6;
+      const glowGrad = ctx.createRadialGradient(
+        centerX, centerY, 5,
+        centerX, centerY, 80 + progress * 0.25
+      );
+      glowGrad.addColorStop(0, `rgba(139, 92, 246, ${intensity})`); // Electric violet
+      glowGrad.addColorStop(0.5, `rgba(56, 189, 248, ${intensity * 0.5})`); // Cyan
+      glowGrad.addColorStop(1, 'rgba(6, 7, 11, 0)');
+
+      ctx.fillStyle = glowGrad;
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, 90, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Orbital Ring 1 (Inner Slow Clockwise)
+      ctx.save();
+      ctx.translate(centerX, centerY);
+      ctx.rotate(time * 0.4);
+      ctx.beginPath();
+      ctx.arc(0, 0, 52, 0, Math.PI * 1.4);
+      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = `rgba(56, 189, 248, ${0.4 + (progress / 100) * 0.5})`;
+      ctx.stroke();
+
+      // Ring 1 tick marker
+      ctx.fillStyle = '#38bdf8';
+      ctx.beginPath();
+      ctx.arc(52, 0, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      // Orbital Ring 2 (Middle Counter-Clockwise with Segmented Dash)
+      ctx.save();
+      ctx.translate(centerX, centerY);
+      ctx.rotate(-time * 0.6);
+      ctx.setLineDash([8, 12]);
+      ctx.beginPath();
+      ctx.arc(0, 0, 68, 0, Math.PI * 2);
+      ctx.lineWidth = 1.2;
+      ctx.strokeStyle = 'rgba(168, 85, 247, 0.45)';
+      ctx.stroke();
+      ctx.restore();
+
+      // Orbital Ring 3 (Outer Progress Ring)
+      ctx.save();
+      ctx.translate(centerX, centerY);
+      ctx.rotate(-Math.PI / 2); // Start from top
+      ctx.beginPath();
+      ctx.arc(0, 0, 84, 0, (Math.PI * 2 * progress) / 100);
+      ctx.lineWidth = 3.5;
+      ctx.strokeStyle = '#38bdf8';
+      ctx.shadowColor = '#38bdf8';
+      ctx.shadowBlur = 10;
+      ctx.stroke();
+      ctx.restore();
+
+      // Floating Nebula Particles
+      particles.forEach((p) => {
+        p.angle += p.speed;
+        const currentDist = p.distance + Math.sin(time + p.angle) * 4;
+        const px = centerX + Math.cos(p.angle) * currentDist;
+        const py = centerY + Math.sin(p.angle) * currentDist;
+
+        ctx.fillStyle = `rgba(192, 132, 252, ${p.opacity * (0.4 + (progress / 100) * 0.6)})`;
+        ctx.beginPath();
+        ctx.arc(px, py, p.size, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // Central Pulsing Singularity
+      const pulseSize = 14 + Math.sin(time * 2) * 3 + (progress / 100) * 4;
+      const coreGrad = ctx.createRadialGradient(
+        centerX, centerY, 0,
+        centerX, centerY, pulseSize
+      );
+      coreGrad.addColorStop(0, '#ffffff');
+      coreGrad.addColorStop(0.3, '#38bdf8');
+      coreGrad.addColorStop(0.8, '#8b5cf6');
+      coreGrad.addColorStop(1, 'rgba(139, 92, 246, 0.1)');
+
+      ctx.fillStyle = coreGrad;
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, pulseSize, 0, Math.PI * 2);
+      ctx.fill();
+
+      animationId = requestAnimationFrame(render);
+    };
+
+    render();
+
+    return () => {
+      cancelAnimationFrame(animationId);
+    };
+  }, [progress]);
+
+  return (
+    <div className="relative flex items-center justify-center w-52 h-52 sm:w-60 sm:h-60 mx-auto select-none pointer-events-none">
+      <canvas ref={canvasRef} className="w-full h-full" />
+      <div className="absolute flex flex-col items-center justify-center text-center">
+        <span className="text-3xl sm:text-4xl font-extrabold tracking-tighter text-white drop-shadow-[0_0_12px_rgba(56,189,248,0.7)] font-mono">
+          {progress}%
+        </span>
+        <span className="text-[10px] tracking-widest text-cyan-300/80 font-bold uppercase mt-0.5">
+          Arc Energy
+        </span>
+      </div>
+    </div>
+  );
+};
+
+export default function App() {
+  // Navigation State
+  const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard' | 'mission' | 'journey' | 'settings'
+
+  // User Profile & Settings State
+  const [userName, setUserName] = useState(() => {
+    return localStorage.getItem('arc_user_name') || 'Ansh';
+  });
+
+  const [startDate, setStartDate] = useState(() => {
+    return localStorage.getItem('arc_start_date') || new Date().toISOString().split('T')[0];
+  });
+
+  const [soundEnabled, setSoundEnabled] = useState(() => {
+    const saved = localStorage.getItem('arc_sound');
+    return saved !== null ? JSON.parse(saved) : true;
+  });
+
+  // Daily Targets Lock System State
+  const [isLocked, setIsLocked] = useState(() => {
+    const saved = localStorage.getItem('arc_targets_locked');
+    return saved ? JSON.parse(saved) : false;
+  });
+
+  // Target Habits State
+  const [habits, setHabits] = useState(() => {
+    const saved = localStorage.getItem('arc_habits');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        return STARTER_HABITS;
+      }
+    }
+    return STARTER_HABITS;
+  });
+
+  // Gamification XP & Level State
+  const [xp, setXp] = useState(() => {
+    const saved = localStorage.getItem('arc_xp');
+    return saved ? parseInt(saved, 10) : 380;
+  });
+
+  const [streak, setStreak] = useState(() => {
+    const saved = localStorage.getItem('arc_streak');
+    return saved ? parseInt(saved, 10) : 4;
+  });
+
+  // UI Toast & Modal States
+  const [toastMessage, setToastMessage] = useState(null);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showLockConfirmModal, setShowLockConfirmModal] = useState(false);
+  const [showUnlockModal, setShowUnlockModal] = useState(false);
+  const [showLevelUpModal, setShowLevelUpModal] = useState(null); // holds level info when triggered
+  const [missionFilter, setMissionFilter] = useState('all'); // 'all' | 'pending' | 'completed'
+
+  // Daily Challenge State
+  const [challengeIdx, setChallengeIdx] = useState(0);
+
+  // New Habit Modal Form State
+  const [newHabitName, setNewHabitName] = useState('');
+  const [newHabitCategory, setNewHabitCategory] = useState('Coding');
+  const [newHabitDuration, setNewHabitDuration] = useState(30);
+  const [newHabitReminder, setNewHabitReminder] = useState('18:00');
+  const [newHabitXP, setNewHabitXP] = useState(25);
+  const [newHabitDesc, setNewHabitDesc] = useState('');
+
+  useEffect(() => {
+    localStorage.setItem('arc_user_name', userName);
+  }, [userName]);
+
+  useEffect(() => {
+    localStorage.setItem('arc_start_date', startDate);
+  }, [startDate]);
+
+  useEffect(() => {
+    localStorage.setItem('arc_sound', JSON.stringify(soundEnabled));
+    sfx.muted = !soundEnabled;
+  }, [soundEnabled]);
+
+  useEffect(() => {
+    localStorage.setItem('arc_targets_locked', JSON.stringify(isLocked));
+  }, [isLocked]);
+
+  useEffect(() => {
+    localStorage.setItem('arc_habits', JSON.stringify(habits));
+  }, [habits]);
+
+  useEffect(() => {
+    localStorage.setItem('arc_xp', xp.toString());
+  }, [xp]);
+
+  useEffect(() => {
+    localStorage.setItem('arc_streak', streak.toString());
+  }, [streak]);
+
+  const arcDay = useMemo(() => {
+    const start = new Date(startDate);
+    const today = new Date();
+    start.setHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0);
+    const diffTime = today - start;
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    return Math.max(1, diffDays + 1);
+  }, [startDate]);
+
+  const completedCount = useMemo(() => {
+    return habits.filter((h) => h.completed).length;
+  }, [habits]);
+
+  const totalCount = habits.length;
+
+  const progressPercentage = useMemo(() => {
+    if (totalCount === 0) return 0;
+    return Math.round((completedCount / totalCount) * 100);
+  }, [completedCount, totalCount]);
+
+  const currentLevelInfo = useMemo(() => getLevelInfo(xp), [xp]);
+
+  // Dynamic daily quote based on the day
+  const dailyQuote = useMemo(() => {
+    return MOTIVATIONAL_QUOTES[(arcDay - 1) % MOTIVATIONAL_QUOTES.length];
+  }, [arcDay]);
+
+  const currentChallenge = AI_CHALLENGES[challengeIdx % AI_CHALLENGES.length];
+
+  // Dynamic Greeting based on time
+  const dynamicGreeting = useMemo(() => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good morning';
+    if (hour < 17) return 'Good afternoon';
+    return 'Good evening';
+  }, []);
+
+  const triggerToast = (msg) => {
+    setToastMessage(msg);
+    setTimeout(() => {
+      setToastMessage((prev) => (prev === msg ? null : prev));
+    }, 3200);
+  };
+
+  const handleToggleHabit = (id) => {
+    const habit = habits.find((h) => h.id === id);
+    if (!habit) return;
+
+    const willBeCompleted = !habit.completed;
+    const gainedXP = habit.xp || 20;
+
+    setHabits((prev) =>
+      prev.map((h) => (h.id === id ? { ...h, completed: willBeCompleted } : h))
+    );
+
+    if (willBeCompleted) {
+      sfx.playCompletion();
+      const whisper =
+        COMPLETION_WHISPERS[Math.floor(Math.random() * COMPLETION_WHISPERS.length)];
+      triggerToast(`+${gainedXP} XP • ${whisper}`);
+
+      // Check level up
+      const oldLvl = getLevelInfo(xp).level;
+      const newLvlInfo = getLevelInfo(xp + gainedXP);
+      setXp((prev) => prev + gainedXP);
+
+      if (newLvlInfo.level > oldLvl) {
+        setTimeout(() => {
+          sfx.playLevelUp();
+          setShowLevelUpModal(newLvlInfo);
+        }, 400);
+      }
+    } else {
+      // Reverting habit (deduct XP safely without going below 0)
+      setXp((prev) => Math.max(0, prev - gainedXP));
+      triggerToast('Target marked pending');
+    }
+  };
+
+  const handleCreateHabit = (e) => {
+    e.preventDefault();
+    if (!newHabitName.trim()) return;
+
+    const newTarget = {
+      id: `h-${Date.now()}`,
+      name: newHabitName.trim(),
+      category: newHabitCategory,
+      duration: Number(newHabitDuration) || 20,
+      reminder: newHabitReminder || '19:00',
+      xp: Number(newHabitXP) || 25,
+      completed: false,
+      description: newHabitDesc.trim() || 'Daily Winter Arc milestone.'
+    };
+
+    setHabits((prev) => [newTarget, ...prev]);
+    setShowAddModal(false);
+    setNewHabitName('');
+    setNewHabitDesc('');
+    triggerToast('New target logged into daily protocol');
+  };
+
+  const handleDeleteHabit = (id) => {
+    if (isLocked) {
+      triggerToast('Targets are locked. Unlock protocol to adjust.');
+      return;
+    }
+    setHabits((prev) => prev.filter((h) => h.id !== id));
+    triggerToast('Target removed');
+  };
+
+  const handleAddChallengeToHabits = () => {
+    const exists = habits.some((h) => h.name === currentChallenge.title);
+    if (exists) {
+      triggerToast('Challenge is already in today’s targets');
+      return;
+    }
+
+    const newHabit = {
+      id: `ch-add-${Date.now()}`,
+      name: currentChallenge.title,
+      category: currentChallenge.category,
+      duration: currentChallenge.duration,
+      reminder: '18:00',
+      xp: currentChallenge.xp,
+      completed: false,
+      description: currentChallenge.description
+    };
+
+    setHabits((prev) => [...prev, newHabit]);
+    triggerToast(`Challenge synced to mission (+${currentChallenge.xp} XP available)`);
+  };
+
+  const handleNextChallenge = () => {
+    setChallengeIdx((prev) => (prev + 1) % AI_CHALLENGES.length);
+  };
+
+  const handleLockProtocol = () => {
+    setIsLocked(true);
+    setShowLockConfirmModal(false);
+    sfx.playLock();
+    triggerToast('MISSION LOCKED: Protocol fortified for today');
+  };
+
+  const handleUnlockProtocol = () => {
+    setIsLocked(false);
+    setShowUnlockModal(false);
+    triggerToast('Protocol unlocked for adjustments');
+  };
+
+  const handleTestNotification = async () => {
+    if (!('Notification' in window)) {
+      triggerToast('System notifications not supported in this browser');
+      return;
+    }
+
+    if (Notification.permission === 'granted') {
+      new Notification('ARC//RISE — Active Protocol', {
+        body: 'Ansh, your Winter Arc targets await. Maintain focus.',
+        icon: '/favicon.ico'
+      });
+      triggerToast('Direct notification dispatched');
+    } else if (Notification.permission !== 'denied') {
+      const permission = await Notification.requestPermission();
+      if (permission === 'granted') {
+        new Notification('ARC//RISE — System Connected', {
+          body: 'Notifications established. Discipline initialized.'
+        });
+        triggerToast('Notification authorized and fired');
+      } else {
+        triggerToast('Notification permission declined');
+      }
+    } else {
+      triggerToast('Notifications are blocked in browser preferences');
+    }
+  };
+
+  const handleExportData = () => {
+    const backup = {
+      userName,
+      startDate,
+      streak,
+      xp,
+      habits,
+      isLocked,
+      exportedAt: new Date().toISOString()
+    };
+    const blob = new Blob([JSON.stringify(backup, null, 2)], {
+      type: 'application/json'
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `arc-rise-backup-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    triggerToast('Winter Arc protocol exported to JSON');
+  };
+
+  const handleResetData = () => {
+    if (window.confirm('Reset all Winter Arc progress, habits, and XP to factory zero?')) {
+      localStorage.clear();
+      setHabits(STARTER_HABITS);
+      setXp(120);
+      setStreak(1);
+      setIsLocked(false);
+      setStartDate(new Date().toISOString().split('T')[0]);
+      triggerToast('Protocol reset to day zero');
+    }
+  };
+
+  // Filtered habits for Daily Mission tab
+  const filteredHabits = habits.filter((h) => {
+    if (missionFilter === 'pending') return !h.completed;
+    if (missionFilter === 'completed') return h.completed;
+    return true;
+  });
+
+  return (
+    <div className="min-h-screen bg-[#06070B] text-slate-100 flex flex-col font-sans selection:bg-cyan-500/30 selection:text-cyan-200 relative overflow-x-hidden">
+      {/* Background Ambient Cyber Glows */}
+      <div className="fixed top-0 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-gradient-to-b from-violet-600/10 via-cyan-500/5 to-transparent blur-[120px] pointer-events-none -z-10" />
+      <div className="fixed bottom-10 right-10 w-96 h-96 bg-cyan-600/5 blur-[140px] pointer-events-none -z-10" />
+
+      {}
+      <header className="sticky top-0 z-40 backdrop-blur-xl bg-[#06070B]/85 border-b border-white/[0.07] px-4 sm:px-8 py-3.5 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-violet-600 via-indigo-600 to-cyan-400 p-[1px] shadow-[0_0_15px_rgba(139,92,246,0.5)]">
+            <div className="w-full h-full bg-[#080a10] rounded-[7px] flex items-center justify-center">
+              <Zap className="w-4 h-4 text-cyan-400" />
+            </div>
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="font-extrabold tracking-wider text-sm sm:text-base bg-gradient-to-r from-white via-slate-200 to-cyan-300 bg-clip-text text-transparent">
+                ARC//RISE
+              </span>
+              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-violet-500/20 text-violet-300 border border-violet-500/30 font-semibold tracking-wider">
+                DAY {String(arcDay).padStart(2, '0')}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Desktop Navigation Links */}
+        <nav className="hidden md:flex items-center gap-1 bg-white/[0.03] border border-white/[0.08] p-1 rounded-xl backdrop-blur-md">
+          {[
+            { id: 'dashboard', label: 'Dashboard', icon: Flame },
+            { id: 'mission', label: 'Daily Mission', icon: Shield },
+            { id: 'journey', label: 'My Journey', icon: Trophy },
+            { id: 'settings', label: 'Settings', icon: Settings }
+          ].map((tab) => {
+            const Icon = tab.icon;
+            const active = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-medium tracking-wide transition-all duration-200 ${
+                  active
+                    ? 'bg-gradient-to-r from-violet-600/80 to-cyan-600/80 text-white shadow-[0_0_12px_rgba(56,189,248,0.3)]'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.04]'
+                }`}
+              >
+                <Icon className="w-3.5 h-3.5" />
+                {tab.label}
+              </button>
+            );
+          })}
+        </nav>
+
+        {/* Header Right Status Bar */}
+        <div className="flex items-center gap-2.5">
+          {/* Audio toggle button */}
+          <button
+            onClick={() => setSoundEnabled(!soundEnabled)}
+            className="p-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-slate-300 hover:text-cyan-400 hover:border-cyan-500/30 transition-all text-xs"
+            title={soundEnabled ? 'Mute SFX' : 'Enable SFX'}
+          >
+            {soundEnabled ? (
+              <Volume2 className="w-4 h-4 text-cyan-400" />
+            ) : (
+              <VolumeX className="w-4 h-4 text-slate-500" />
+            )}
+          </button>
+
+          {/* Quick Streak Counter */}
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20 text-amber-300 text-xs font-semibold">
+            <Flame className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+            <span>{streak}d</span>
+          </div>
+
+          {/* Quick Lock Indicator */}
+          <div
+            onClick={() => {
+              if (isLocked) setShowUnlockModal(true);
+              else setShowLockConfirmModal(true);
+            }}
+            className={`cursor-pointer flex items-center gap-1 px-2.5 py-1 rounded-lg border text-xs font-semibold transition-all ${
+              isLocked
+                ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30 shadow-[0_0_10px_rgba(16,185,129,0.15)]'
+                : 'bg-white/[0.04] text-slate-400 border-white/[0.08] hover:border-white/20'
+            }`}
+          >
+            {isLocked ? (
+              <>
+                <Lock className="w-3 h-3 text-emerald-400" />
+                <span className="hidden sm:inline">Locked</span>
+              </>
+            ) : (
+              <>
+                <Unlock className="w-3 h-3" />
+                <span className="hidden sm:inline">Unlocked</span>
+              </>
+            )}
+          </div>
+        </div>
+      </header>
+
+      {}
+      <main className="flex-1 max-w-5xl w-full mx-auto p-4 sm:p-6 lg:p-8 pb-28 md:pb-12">
+        {/* VIEW 1: DASHBOARD */}
+        {activeTab === 'dashboard' && (
+          <div className="space-y-6 animate-fadeIn">
+            {/* Top Greeting & Dynamic Quote Card */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-b from-white/[0.06] to-white/[0.01] border border-white/[0.09] p-5 sm:p-6 backdrop-blur-xl shadow-2xl">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <span className="text-xs uppercase tracking-widest text-cyan-400 font-bold font-mono">
+                    WINTER ARC PROTOCOL • DAY {String(arcDay).padStart(2, '0')}
+                  </span>
+                  <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight mt-1">
+                    {dynamicGreeting}, <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-indigo-300 to-cyan-300">{userName}</span>
+                  </h1>
+                  <p className="text-sm text-slate-400 italic mt-1 font-light max-w-xl">
+                    "{dailyQuote}"
+                  </p>
+                </div>
+
+                <div className="flex sm:flex-col items-center sm:items-end justify-between border-t sm:border-t-0 border-white/[0.07] pt-3 sm:pt-0">
+                  <div className="text-xs text-slate-400">Mission State</div>
+                  <div className="text-lg sm:text-xl font-bold font-mono text-cyan-300">
+                    {completedCount} <span className="text-slate-500 text-sm">/ {totalCount} Targets</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Central Animated Energy Core & Tactical Hub */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+              {/* Energy Core Visualizer */}
+              <div className="lg:col-span-6 flex flex-col items-center justify-center p-6 rounded-2xl bg-gradient-to-b from-white/[0.04] to-transparent border border-white/[0.07] backdrop-blur-lg relative">
+                <div className="absolute top-4 left-4 flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+                  <span className="text-[11px] font-mono tracking-wider text-slate-400 uppercase">
+                    Orbital Core Synthesis
+                  </span>
+                </div>
+
+                <EnergyCore progress={progressPercentage} />
+
+                <div className="w-full mt-4 grid grid-cols-3 gap-2 text-center pt-3 border-t border-white/[0.06]">
+                  <div>
+                    <div className="text-[10px] text-slate-400 uppercase font-mono">Streak</div>
+                    <div className="text-sm font-bold text-amber-400">{streak} Days</div>
+                  </div>
+                  <div>
+                    <div className="text-[10px] text-slate-400 uppercase font-mono">Level</div>
+                    <div className="text-sm font-bold text-violet-400">LVL {currentLevelInfo.level}</div>
+                  </div>
+                  <div>
+                    <div className="text-[10px] text-slate-400 uppercase font-mono">Status</div>
+                    <div className="text-sm font-bold text-cyan-400">
+                      {progressPercentage === 100 ? 'Omnipresent' : progressPercentage >= 50 ? 'Surging' : 'Engaged'}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Today's Mission Quick Grid */}
+              <div className="lg:col-span-6 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Shield className="w-4 h-4 text-cyan-400" />
+                    <h2 className="text-sm font-bold tracking-wider uppercase text-slate-200">
+                      Primary Objectives
+                    </h2>
+                  </div>
+                  <button
+                    onClick={() => setActiveTab('mission')}
+                    className="text-xs text-cyan-400 hover:text-cyan-300 flex items-center gap-1 font-medium transition-colors"
+                  >
+                    View All <ChevronRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+
+                <div className="space-y-2.5">
+                  {habits.slice(0, 4).map((habit) => {
+                    const meta = CATEGORY_META[habit.category] || CATEGORY_META.Custom;
+                    const Icon = meta.icon;
+                    return (
+                      <div
+                        key={habit.id}
+                        onClick={() => handleToggleHabit(habit.id)}
+                        className={`group cursor-pointer flex items-center justify-between p-3.5 rounded-xl border transition-all duration-300 backdrop-blur-md ${
+                          habit.completed
+                            ? 'bg-white/[0.02] border-white/[0.06] opacity-75'
+                            : 'bg-white/[0.05] border-white/[0.1] hover:border-cyan-500/40 hover:bg-white/[0.07] hover:shadow-[0_0_20px_rgba(56,189,248,0.12)]'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <button
+                            type="button"
+                            className={`w-6 h-6 rounded-lg flex items-center justify-center transition-all ${
+                              habit.completed
+                                ? 'bg-cyan-500 text-[#06070B] shadow-[0_0_12px_rgba(56,189,248,0.8)]'
+                                : 'border border-slate-600 group-hover:border-cyan-400'
+                            }`}
+                          >
+                            {habit.completed && <CheckCircle2 className="w-4 h-4" />}
+                          </button>
+
+                          <div>
+                            <span
+                              className={`text-sm font-medium transition-all ${
+                                habit.completed
+                                  ? 'line-through text-slate-500'
+                                  : 'text-slate-200 group-hover:text-white'
+                              }`}
+                            >
+                              {habit.name}
+                            </span>
+                            <div className="flex items-center gap-2 mt-0.5">
+                              <span className={`text-[10px] flex items-center gap-1 ${meta.color}`}>
+                                <Icon className="w-3 h-3" />
+                                {habit.category}
+                              </span>
+                              <span className="text-[10px] text-slate-500">•</span>
+                              <span className="text-[10px] text-slate-400 font-mono">
+                                {habit.duration}m
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-mono font-bold text-violet-400/90 bg-violet-500/10 px-2 py-0.5 rounded border border-violet-500/20">
+                            +{habit.xp} XP
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {habits.length > 4 && (
+                  <p className="text-center text-xs text-slate-500 pt-1 font-mono">
+                    +{habits.length - 4} more targets queued in daily protocol
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* AI-Inspired Daily Recommendation Card */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-violet-950/30 via-slate-900/60 to-cyan-950/30 border border-violet-500/30 p-5 backdrop-blur-xl">
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div className="space-y-1.5 max-w-2xl">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-cyan-400 animate-spin" style={{ animationDuration: '6s' }} />
+                    <span className="text-xs font-bold tracking-widest text-cyan-300 uppercase font-mono">
+                      Dynamic Arc Catalyst
+                    </span>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-400/10 text-cyan-300 border border-cyan-400/20 font-mono">
+                      +{currentChallenge.xp} XP
+                    </span>
+                  </div>
+                  <h3 className="text-lg font-bold text-white tracking-wide">
+                    "{currentChallenge.title}"
+                  </h3>
+                  <p className="text-xs text-slate-300 font-light leading-relaxed">
+                    {currentChallenge.description}
+                  </p>
+                  <p className="text-[11px] text-slate-400 italic">
+                    <span className="text-violet-300 font-semibold not-italic">Strategic Value:</span> {currentChallenge.why}
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2.5 w-full md:w-auto">
+                  <button
+                    onClick={handleNextChallenge}
+                    className="flex-1 md:flex-initial px-3.5 py-2 rounded-xl text-xs font-medium bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.1] text-slate-300 transition-colors"
+                  >
+                    Shuffle
+                  </button>
+                  <button
+                    onClick={handleAddChallengeToHabits}
+                    className="flex-1 md:flex-initial px-4 py-2 rounded-xl text-xs font-semibold bg-gradient-to-r from-violet-600 to-cyan-600 hover:from-violet-500 hover:to-cyan-500 text-white shadow-[0_0_15px_rgba(56,189,248,0.3)] transition-all flex items-center justify-center gap-1.5"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    Accept Catalyst
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* VIEW 2: DAILY MISSION */}
+        {activeTab === 'mission' && (
+          <div className="space-y-6 animate-fadeIn">
+            {/* Mission Lock Control Bar */}
+            <div className="rounded-2xl bg-gradient-to-r from-white/[0.05] to-white/[0.02] border border-white/[0.08] p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 backdrop-blur-md">
+              <div>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-lg font-extrabold tracking-tight text-white">
+                    MISSION COMMAND MATRIX
+                  </h2>
+                  {isLocked && (
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold uppercase tracking-wider flex items-center gap-1">
+                      <Lock className="w-3 h-3" /> Locked
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  {isLocked
+                    ? "Protocol is locked for the day. Modification disabled to prevent excuses."
+                    : "Formulate your targets, prioritize essentials, then lock your commitment."}
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2.5 w-full sm:w-auto">
+                <button
+                  disabled={isLocked}
+                  onClick={() => setShowAddModal(true)}
+                  className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
+                    isLocked
+                      ? 'bg-white/[0.02] text-slate-600 border border-white/[0.04] cursor-not-allowed'
+                      : 'bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.12] text-white hover:border-cyan-500/40'
+                  }`}
+                >
+                  <Plus className="w-3.5 h-3.5 text-cyan-400" />
+                  Add Target
+                </button>
+
+                {isLocked ? (
+                  <button
+                    onClick={() => setShowUnlockModal(true)}
+                    className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-emerald-950/40 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-900/50 transition-all"
+                  >
+                    <Unlock className="w-3.5 h-3.5" />
+                    Unlock Matrix
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => setShowLockConfirmModal(true)}
+                    className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white shadow-[0_0_15px_rgba(139,92,246,0.4)] transition-all"
+                  >
+                    <Lock className="w-3.5 h-3.5" />
+                    Lock Protocol
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Filter Tabs & Quick Completion Bar */}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+              <div className="flex items-center gap-1 bg-white/[0.03] p-1 rounded-xl border border-white/[0.07] w-full sm:w-auto">
+                {['all', 'pending', 'completed'].map((filter) => (
+                  <button
+                    key={filter}
+                    onClick={() => setMissionFilter(filter)}
+                    className={`flex-1 sm:flex-initial px-4 py-1.5 rounded-lg text-xs font-medium capitalize transition-all ${
+                      missionFilter === filter
+                        ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
+                        : 'text-slate-400 hover:text-slate-200'
+                    }`}
+                  >
+                    {filter}
+                  </button>
+                ))}
+              </div>
+
+              <div className="text-xs text-slate-400 font-mono flex items-center gap-2">
+                <span>Total XP value today:</span>
+                <span className="font-bold text-violet-400">
+                  {habits.reduce((acc, h) => acc + (h.xp || 20), 0)} XP
+                </span>
+              </div>
+            </div>
+
+            {/* Complete Habits List */}
+            <div className="space-y-3">
+              {filteredHabits.length === 0 ? (
+                <div className="text-center py-16 border border-dashed border-white/[0.08] rounded-2xl bg-white/[0.01]">
+                  <Activity className="w-8 h-8 text-slate-600 mx-auto mb-2 animate-bounce" />
+                  <p className="text-sm text-slate-400 font-medium">No targets match filter</p>
+                  <p className="text-xs text-slate-600 mt-1">
+                    {missionFilter === 'completed'
+                      ? 'Mark habits complete to populate this section.'
+                      : 'All filtered items executed.'}
+                  </p>
+                </div>
+              ) : (
+                filteredHabits.map((habit) => {
+                  const meta = CATEGORY_META[habit.category] || CATEGORY_META.Custom;
+                  const Icon = meta.icon;
+
+                  return (
+                    <div
+                      key={habit.id}
+                      className={`relative group rounded-2xl border transition-all duration-300 p-4 sm:p-5 backdrop-blur-md flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
+                        habit.completed
+                          ? 'bg-white/[0.02] border-white/[0.06] opacity-80'
+                          : 'bg-white/[0.04] border-white/[0.09] hover:border-cyan-500/40 hover:bg-white/[0.06]'
+                      }`}
+                    >
+                      <div className="flex items-start gap-4">
+                        <button
+                          type="button"
+                          onClick={() => handleToggleHabit(habit.id)}
+                          className={`mt-0.5 w-6 h-6 rounded-lg flex items-center justify-center transition-all ${
+                            habit.completed
+                              ? 'bg-cyan-500 text-[#06070B] shadow-[0_0_12px_rgba(56,189,248,0.7)]'
+                              : 'border-2 border-slate-600 group-hover:border-cyan-400'
+                          }`}
+                        >
+                          {habit.completed && <CheckCircle2 className="w-4 h-4 stroke-[3]" />}
+                        </button>
+
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span
+                              className={`text-base font-semibold transition-all ${
+                                habit.completed ? 'line-through text-slate-500' : 'text-slate-100'
+                              }`}
+                            >
+                              {habit.name}
+                            </span>
+                            <span
+                              className={`text-[10px] px-2 py-0.5 rounded-full border flex items-center gap-1 ${meta.bg} ${meta.color} ${meta.border}`}
+                            >
+                              <Icon className="w-3 h-3" />
+                              {habit.category}
+                            </span>
+                          </div>
+
+                          <p className="text-xs text-slate-400 font-light max-w-xl">
+                            {habit.description}
+                          </p>
+
+                          <div className="flex items-center gap-3 pt-1 text-[11px] text-slate-500 font-mono">
+                            <span className="flex items-center gap-1 text-slate-400">
+                              <Clock className="w-3 h-3 text-cyan-400" />
+                              {habit.duration} mins
+                            </span>
+                            {habit.reminder && (
+                              <span className="flex items-center gap-1 text-slate-400">
+                                <Bell className="w-3 h-3 text-violet-400" />
+                                {habit.reminder}
+                              </span>
+                            )}
+                            <span className="text-violet-400 font-bold">
+                              +{habit.xp} XP
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Right Actions: Delete (disabled if locked) */}
+                      {!isLocked && (
+                        <div className="flex sm:flex-col items-center justify-end gap-2 border-t sm:border-t-0 border-white/[0.05] pt-2 sm:pt-0">
+                          <button
+                            onClick={() => handleDeleteHabit(habit.id)}
+                            className="p-2 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
+                            title="Remove Target"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* VIEW 3: MY JOURNEY */}
+        {activeTab === 'journey' && (
+          <div className="space-y-6 animate-fadeIn">
+            {/* Level Tier Status Banner */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-violet-950/40 via-indigo-950/20 to-cyan-950/30 border border-violet-500/30 p-6 backdrop-blur-xl">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <span className="text-xs font-mono font-bold text-violet-400 tracking-wider">
+                    {currentLevelInfo.badge} • EVOLUTION RANK
+                  </span>
+                  <h2 className="text-2xl sm:text-3xl font-extrabold text-white mt-0.5">
+                    LEVEL {String(currentLevelInfo.level).padStart(2, '0')} — {currentLevelInfo.title}
+                  </h2>
+                  <p className="text-xs text-slate-400 mt-1">
+                    Continuous Winter Arc performance unlocks higher consciousness and executive stamina.
+                  </p>
+                </div>
+
+                <div className="text-right">
+                  <div className="text-xs text-slate-400 font-mono">Current Protocol XP</div>
+                  <div className="text-2xl font-black font-mono text-cyan-300">
+                    {xp}{' '}
+                    <span className="text-xs text-slate-500 font-normal">
+                      / {currentLevelInfo.targetXP} XP
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Level Progress Bar */}
+              <div className="mt-5 space-y-1.5">
+                <div className="w-full bg-slate-900/80 rounded-full h-2.5 overflow-hidden border border-white/[0.08] p-[1px]">
+                  <div
+                    className="h-full bg-gradient-to-r from-violet-600 via-indigo-500 to-cyan-400 rounded-full transition-all duration-700 shadow-[0_0_12px_rgba(56,189,248,0.5)]"
+                    style={{ width: `${currentLevelInfo.percentage}%` }}
+                  />
+                </div>
+                <div className="flex justify-between text-[10px] font-mono text-slate-500">
+                  <span>{currentLevelInfo.currentXP - currentLevelInfo.baseXP} XP earned in tier</span>
+                  <span>{currentLevelInfo.targetXP - currentLevelInfo.currentXP} XP to next evolution</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Lifetime Arc Metrics Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+              {[
+                { label: 'Total Habits Kept', value: habits.filter(h => h.completed).length + 42, icon: CheckCircle2, color: 'text-cyan-400' },
+                { label: 'Longest Streak', value: `${Math.max(streak, 12)} Days`, icon: Flame, color: 'text-amber-400' },
+                { label: 'Study & Code Hours', value: '48.5h', icon: Code, color: 'text-violet-400' },
+                { label: 'Running & Stamina', value: '38.2 km', icon: Activity, color: 'text-emerald-400' }
+              ].map((stat, idx) => {
+                const Icon = stat.icon;
+                return (
+                  <div
+                    key={idx}
+                    className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.07] backdrop-blur-md"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-slate-400 font-medium">{stat.label}</span>
+                      <Icon className={`w-4 h-4 ${stat.color}`} />
+                    </div>
+                    <div className="text-xl sm:text-2xl font-extrabold text-white mt-2 font-mono">
+                      {stat.value}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* 30-Day Activity Heatmap Matrix */}
+            <div className="p-5 sm:p-6 rounded-2xl bg-white/[0.03] border border-white/[0.08] backdrop-blur-xl">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="text-sm font-bold tracking-wider uppercase text-slate-200">
+                    30-Day Consistency Lattice
+                  </h3>
+                  <p className="text-xs text-slate-400">
+                    Execution intensity matrix over the past month.
+                  </p>
+                </div>
+                <div className="flex items-center gap-1.5 text-[10px] text-slate-400 font-mono">
+                  <span>Less</span>
+                  <div className="w-2.5 h-2.5 rounded-sm bg-slate-800" />
+                  <div className="w-2.5 h-2.5 rounded-sm bg-cyan-900/60" />
+                  <div className="w-2.5 h-2.5 rounded-sm bg-cyan-600/70" />
+                  <div className="w-2.5 h-2.5 rounded-sm bg-cyan-400" />
+                  <span>Max</span>
+                </div>
+              </div>
+
+              {/* Heatmap Grid */}
+              <div className="grid grid-cols-6 sm:grid-cols-10 gap-2 pt-2">
+                {Array.from({ length: 30 }).map((_, i) => {
+                  const dayNum = i + 1;
+                  // Deterministic sample values
+                  const intensityLevel =
+                    dayNum === arcDay
+                      ? progressPercentage > 80
+                        ? 3
+                        : progressPercentage > 40
+                        ? 2
+                        : 1
+                      : (dayNum * 7) % 4;
+
+                  const colorClass =
+                    intensityLevel === 3
+                      ? 'bg-cyan-400 shadow-[0_0_8px_rgba(56,189,248,0.7)] text-[#06070B]'
+                      : intensityLevel === 2
+                      ? 'bg-cyan-600/70 text-white'
+                      : intensityLevel === 1
+                      ? 'bg-cyan-950/60 text-slate-400 border border-cyan-800/30'
+                      : 'bg-slate-900/90 text-slate-600 border border-white/[0.03]';
+
+                  return (
+                    <div
+                      key={i}
+                      className={`h-9 rounded-lg flex flex-col items-center justify-center transition-all hover:scale-105 cursor-pointer font-mono text-[10px] ${colorClass}`}
+                      title={`Day ${dayNum}: Intensity Level ${intensityLevel}`}
+                    >
+                      <span className="font-bold">{dayNum}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Arc Milestones & Badges */}
+            <div className="p-5 sm:p-6 rounded-2xl bg-white/[0.03] border border-white/[0.08] backdrop-blur-xl">
+              <h3 className="text-sm font-bold tracking-wider uppercase text-slate-200 mb-4 flex items-center gap-2">
+                <Trophy className="w-4 h-4 text-amber-400" />
+                Winter Arc Milestones
+              </h3>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {[
+                  { title: "First Blood", desc: "First 100% daily protocol completion", unlocked: true },
+                  { title: "Cold Discipline", desc: "Sustain a verified 7-day streak", unlocked: streak >= 7 },
+                  { title: "The Century Club", desc: "Complete 100 total winter arc habits", unlocked: xp > 1500 },
+                  { title: "Polymath Sprint", desc: "Log 30+ hours of coding & study", unlocked: true },
+                  { title: "Aerobic Fortress", desc: "Surpass 50 km running distance", unlocked: false },
+                  { title: "Apex Winter Arc", desc: "Reach Level 07 Transcendence", unlocked: currentLevelInfo.level >= 7 }
+                ].map((m, idx) => (
+                  <div
+                    key={idx}
+                    className={`p-3.5 rounded-xl border transition-all ${
+                      m.unlocked
+                        ? 'bg-gradient-to-b from-white/[0.05] to-white/[0.02] border-amber-500/30 shadow-[0_0_15px_rgba(245,158,11,0.06)]'
+                        : 'bg-white/[0.01] border-white/[0.05] opacity-40'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className={`w-2 h-2 rounded-full ${m.unlocked ? 'bg-amber-400' : 'bg-slate-700'}`} />
+                      <span className={`text-xs font-bold ${m.unlocked ? 'text-amber-200' : 'text-slate-400'}`}>
+                        {m.title}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-400 mt-1">
+                      {m.desc}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* VIEW 4: SETTINGS */}
+        {activeTab === 'settings' && (
+          <div className="max-w-2xl mx-auto space-y-6 animate-fadeIn">
+            <div className="rounded-2xl bg-white/[0.03] border border-white/[0.08] p-6 backdrop-blur-xl space-y-5">
+              <h2 className="text-lg font-bold text-white tracking-wide border-b border-white/[0.07] pb-3">
+                Winter Arc Identity & Temporal Settings
+              </h2>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-xs font-mono uppercase text-slate-400 mb-1.5">
+                    User Call-sign / First Name
+                  </label>
+                  <input
+                    type="text"
+                    value={userName}
+                    onChange={(e) => setUserName(e.target.value)}
+                    className="w-full bg-black/40 border border-white/[0.1] rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-400 transition-colors"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-mono uppercase text-slate-400 mb-1.5">
+                      Arc Start Date
+                    </label>
+                    <input
+                      type="date"
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
+                      className="w-full bg-black/40 border border-white/[0.1] rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-cyan-400 transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-mono uppercase text-slate-400 mb-1.5">
+                      Current Arc Day Calculated
+                    </label>
+                    <div className="bg-black/40 border border-white/[0.1] rounded-xl px-4 py-2 text-sm font-mono text-cyan-300 font-bold">
+                      Day {String(arcDay).padStart(2, '0')}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Smart Reminders & Web Notifications */}
+            <div className="rounded-2xl bg-white/[0.03] border border-white/[0.08] p-6 backdrop-blur-xl space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-bold text-white">Smart Browser Reminders</h3>
+                  <p className="text-xs text-slate-400 mt-0.5">
+                    Uses the HTML5 Notification API for scheduled habit reminders.
+                  </p>
+                </div>
+                <Bell className="w-5 h-5 text-cyan-400" />
+              </div>
+
+              <div className="pt-2 flex flex-col sm:flex-row items-center gap-3">
+                <button
+                  onClick={handleTestNotification}
+                  className="w-full sm:w-auto px-4 py-2 rounded-xl text-xs font-semibold bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.12] text-cyan-300 flex items-center justify-center gap-2 transition-colors"
+                >
+                  <Bell className="w-3.5 h-3.5" />
+                  Test Notification Trigger
+                </button>
+                <span className="text-[11px] text-slate-500">
+                  Ensure notifications are permitted in your browser.
+                </span>
+              </div>
+            </div>
+
+            {/* Data Sovereignty & Diagnostics */}
+            <div className="rounded-2xl bg-white/[0.03] border border-white/[0.08] p-6 backdrop-blur-xl space-y-4">
+              <h3 className="text-sm font-bold text-white">Data Sovereignty & Persistence</h3>
+              <p className="text-xs text-slate-400">
+                All metrics, habits, and streak data remain 100% saved locally on this browser.
+              </p>
+
+              <div className="flex flex-wrap gap-3 pt-2">
+                <button
+                  onClick={handleExportData}
+                  className="px-4 py-2 rounded-xl text-xs font-semibold bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.1] text-slate-200 flex items-center gap-2 transition-colors"
+                >
+                  <Download className="w-3.5 h-3.5 text-cyan-400" />
+                  Export JSON Backup
+                </button>
+
+                <button
+                  onClick={handleResetData}
+                  className="px-4 py-2 rounded-xl text-xs font-semibold bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-300 flex items-center gap-2 transition-colors"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  Reset Protocol
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </main>
+
+      {}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#06070B]/90 backdrop-blur-xl border-t border-white/[0.08] px-4 py-2 flex items-center justify-around">
+        {[
+          { id: 'dashboard', label: 'Dashboard', icon: Flame },
+          { id: 'mission', label: 'Mission', icon: Shield },
+          { id: 'journey', label: 'Journey', icon: Trophy },
+          { id: 'settings', label: 'Settings', icon: Settings }
+        ].map((tab) => {
+          const Icon = tab.icon;
+          const active = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
+                active ? 'text-cyan-400' : 'text-slate-500 hover:text-slate-300'
+              }`}
+            >
+              <Icon className="w-5 h-5" />
+              <span className="text-[10px] font-medium">{tab.label}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {}
+      {showAddModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
+          <div className="relative w-full max-w-md rounded-2xl bg-[#090C14] border border-white/[0.12] p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
+              <h3 className="text-base font-bold text-white flex items-center gap-2">
+                <Plus className="w-4 h-4 text-cyan-400" />
+                Initialize Daily Target
+              </h3>
+              <button
+                onClick={() => setShowAddModal(false)}
+                className="text-slate-400 hover:text-white"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateHabit} className="space-y-3.5">
+              <div>
+                <label className="block text-xs font-mono uppercase text-slate-400 mb-1">
+                  Target Name
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Master Neural Network Backprop"
+                  value={newHabitName}
+                  onChange={(e) => setNewHabitName(e.target.value)}
+                  className="w-full bg-black/50 border border-white/[0.1] rounded-xl px-3.5 py-2 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:border-cyan-400"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-mono uppercase text-slate-400 mb-1">
+                    Category
+                  </label>
+                  <select
+                    value={newHabitCategory}
+                    onChange={(e) => setNewHabitCategory(e.target.value)}
+                    className="w-full bg-[#0d111c] border border-white/[0.1] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-400"
+                  >
+                    {Object.keys(CATEGORY_META).map((cat) => (
+                      <option key={cat} value={cat}>
+                        {cat}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-mono uppercase text-slate-400 mb-1">
+                    XP Weight
+                  </label>
+                  <select
+                    value={newHabitXP}
+                    onChange={(e) => setNewHabitXP(e.target.value)}
+                    className="w-full bg-[#0d111c] border border-white/[0.1] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-400"
+                  >
+                    <option value={10}>10 XP (Light Drill)</option>
+                    <option value={20}>20 XP (Standard Habit)</option>
+                    <option value={30}>30 XP (Major Deep Work)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-mono uppercase text-slate-400 mb-1">
+                    Duration (Minutes)
+                  </label>
+                  <input
+                    type="number"
+                    min="5"
+                    max="300"
+                    value={newHabitDuration}
+                    onChange={(e) => setNewHabitDuration(e.target.value)}
+                    className="w-full bg-black/50 border border-white/[0.1] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-400"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-mono uppercase text-slate-400 mb-1">
+                    Reminder Time
+                  </label>
+                  <input
+                    type="time"
+                    value={newHabitReminder}
+                    onChange={(e) => setNewHabitReminder(e.target.value)}
+                    className="w-full bg-black/50 border border-white/[0.1] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-400"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-mono uppercase text-slate-400 mb-1">
+                  Tactical Description
+                </label>
+                <input
+                  type="text"
+                  placeholder="Optional brief objective summary"
+                  value={newHabitDesc}
+                  onChange={(e) => setNewHabitDesc(e.target.value)}
+                  className="w-full bg-black/50 border border-white/[0.1] rounded-xl px-3.5 py-2 text-xs text-white placeholder:text-slate-600 focus:outline-none focus:border-cyan-400"
+                />
+              </div>
+
+              <div className="pt-2 flex justify-end gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => setShowAddModal(false)}
+                  className="px-4 py-2 rounded-xl text-xs text-slate-400 hover:text-white"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 rounded-xl text-xs font-semibold bg-gradient-to-r from-violet-600 to-cyan-600 text-white shadow-[0_0_15px_rgba(56,189,248,0.3)] hover:opacity-95"
+                >
+                  Commit Target
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {}
+      {showLockConfirmModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
+          <div className="relative w-full max-w-sm rounded-2xl bg-[#090C14] border border-cyan-500/40 p-6 shadow-2xl text-center space-y-4">
+            <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-violet-600 to-cyan-500 mx-auto flex items-center justify-center text-white shadow-[0_0_20px_rgba(56,189,248,0.5)]">
+              <Lock className="w-6 h-6" />
+            </div>
+
+            <div>
+              <h3 className="text-lg font-black tracking-tight text-white uppercase">
+                "YOUR MISSION IS SET."
+              </h3>
+              <p className="text-xs text-slate-300 mt-2 font-light leading-relaxed">
+                Today’s targets will be frozen in read-only protocol. You cannot casually alter or delete targets once committed.
+              </p>
+            </div>
+
+            <div className="pt-2 flex items-center gap-2.5">
+              <button
+                onClick={() => setShowLockConfirmModal(false)}
+                className="flex-1 py-2.5 rounded-xl text-xs text-slate-400 hover:text-white border border-white/[0.08]"
+              >
+                Reconsider
+              </button>
+              <button
+                onClick={handleLockProtocol}
+                className="flex-1 py-2.5 rounded-xl text-xs font-bold bg-gradient-to-r from-violet-600 to-cyan-600 text-white shadow-[0_0_15px_rgba(56,189,248,0.4)]"
+              >
+                Fortify & Lock
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {}
+      {showUnlockModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
+          <div className="relative w-full max-w-sm rounded-2xl bg-[#090C14] border border-amber-500/40 p-6 shadow-2xl text-center space-y-4">
+            <div className="w-12 h-12 rounded-full bg-amber-500/20 border border-amber-500/40 mx-auto flex items-center justify-center text-amber-400">
+              <AlertTriangle className="w-6 h-6" />
+            </div>
+
+            <div>
+              <h3 className="text-lg font-black tracking-tight text-white uppercase">
+                Unlock Daily Protocol?
+              </h3>
+              <p className="text-xs text-slate-300 mt-2 font-light leading-relaxed">
+                Consistency means defending the commitments you made when you were motivated. Are adjustments truly mandatory?
+              </p>
+            </div>
+
+            <div className="pt-2 flex items-center gap-2.5">
+              <button
+                onClick={() => setShowUnlockModal(false)}
+                className="flex-1 py-2.5 rounded-xl text-xs font-semibold bg-white/[0.06] text-white hover:bg-white/[0.1]"
+              >
+                Stay Locked
+              </button>
+              <button
+                onClick={handleUnlockProtocol}
+                className="flex-1 py-2.5 rounded-xl text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 hover:bg-amber-500/30"
+              >
+                Confirm Unlock
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {}
+      {showLevelUpModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xl animate-fadeIn">
+          <div className="relative w-full max-w-md rounded-3xl bg-gradient-to-b from-[#101426] to-[#07090F] border border-cyan-400/50 p-7 text-center shadow-[0_0_60px_rgba(56,189,248,0.3)] space-y-4">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-violet-600 via-indigo-600 to-cyan-400 mx-auto p-[1px] shadow-[0_0_30px_rgba(56,189,248,0.7)] animate-bounce">
+              <div className="w-full h-full bg-[#080B14] rounded-[15px] flex items-center justify-center">
+                <Trophy className="w-8 h-8 text-cyan-300" />
+              </div>
+            </div>
+
+            <div>
+              <span className="text-xs font-mono font-bold tracking-widest text-cyan-400 uppercase">
+                Arc Threshold Reached
+              </span>
+              <h2 className="text-2xl font-black text-white mt-1">
+                LEVEL {String(showLevelUpModal.level).padStart(2, '0')} UNLOCKED
+              </h2>
+              <p className="text-sm font-semibold text-transparent bg-clip-text bg-gradient-to-r from-violet-300 to-cyan-300 mt-0.5">
+                {showLevelUpModal.title}
+              </p>
+              <p className="text-xs text-slate-300 mt-2 font-light">
+                Your discipline is compounding. The energy core has permanently expanded its baseline capacity.
+              </p>
+            </div>
+
+            <button
+              onClick={() => setShowLevelUpModal(null)}
+              className="w-full py-3 rounded-xl text-xs font-extrabold tracking-wider uppercase bg-gradient-to-r from-violet-600 to-cyan-600 text-white shadow-[0_0_20px_rgba(56,189,248,0.5)] hover:opacity-90"
+            >
+              Continue Ascent
+            </button>
+          </div>
+        </div>
+      )}
+
+      {}
+      {toastMessage && (
+        <div className="fixed bottom-20 md:bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-[#0c101d]/90 border border-cyan-500/40 text-xs font-medium text-cyan-200 shadow-[0_0_25px_rgba(56,189,248,0.3)] backdrop-blur-xl animate-fadeIn">
+          <Zap className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
+    </div>
+  );
+}
